@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS auth_challenges (
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMPTZ NOT NULL,
-    authenticated_at TIMESTAMPTZ
+    authenticated_at TIMESTAMPTZ,
+    username TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sessions (

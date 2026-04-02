@@ -66,6 +66,7 @@ pub struct AuthChallenge {
     pub created_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
     pub authenticated_at: Option<DateTime<Utc>>,
+    pub username: Option<String>,
 }
 
 /// Row in the sessions table.

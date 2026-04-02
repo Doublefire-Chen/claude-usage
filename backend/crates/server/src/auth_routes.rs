@@ -46,6 +46,8 @@ pub struct StatusResponse {
     status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     session_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    username: Option<String>,
 }
 
 pub async fn check_status(
@@ -58,7 +60,7 @@ pub async fn check_status(
         .ok_or(StatusCode::NOT_FOUND)?;
 
     if challenge.status != "authenticated" {
-        return Ok(Json(StatusResponse { status: "pending".into(), session_token: None }));
+        return Ok(Json(StatusResponse { status: "pending".into(), session_token: None, username: None }));
     }
 
     // Challenge is authenticated — create a session
@@ -70,6 +72,7 @@ pub async fn check_status(
     Ok(Json(StatusResponse {
         status: "authenticated".into(),
         session_token: Some(session_token),
+        username: challenge.username,
     }))
 }
 
@@ -90,6 +93,7 @@ pub async fn logout(
 #[derive(Deserialize)]
 pub struct VerifyRequest {
     token: String,
+    username: Option<String>,
 }
 
 pub async fn verify(
@@ -102,7 +106,7 @@ pub async fn verify(
         return Err(StatusCode::FORBIDDEN);
     }
 
-    let ok = shared::db::authenticate_challenge(&state.pool, &body.token)
+    let ok = shared::db::authenticate_challenge(&state.pool, &body.token, body.username.as_deref())
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

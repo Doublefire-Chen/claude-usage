@@ -76,11 +76,12 @@ pub async fn get_auth_challenge(pool: &PgPool, token: &str) -> Result<Option<Aut
     .await
 }
 
-pub async fn authenticate_challenge(pool: &PgPool, token: &str) -> Result<bool, sqlx::Error> {
+pub async fn authenticate_challenge(pool: &PgPool, token: &str, username: Option<&str>) -> Result<bool, sqlx::Error> {
     let result = sqlx::query(
-        "UPDATE auth_challenges SET status = 'authenticated', authenticated_at = NOW() WHERE token = $1 AND status = 'pending' AND expires_at > NOW()",
+        "UPDATE auth_challenges SET status = 'authenticated', authenticated_at = NOW(), username = $2 WHERE token = $1 AND status = 'pending' AND expires_at > NOW()",
     )
     .bind(token)
+    .bind(username)
     .execute(pool)
     .await?;
     Ok(result.rows_affected() > 0)

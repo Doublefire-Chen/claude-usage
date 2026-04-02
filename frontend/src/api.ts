@@ -42,6 +42,7 @@ export interface ChallengeResponse {
 export interface StatusResponse {
   status: "pending" | "authenticated";
   session_token?: string;
+  username?: string;
 }
 
 export async function createChallenge(): Promise<ChallengeResponse> {
@@ -58,6 +59,9 @@ export async function checkChallengeStatus(
   const data: StatusResponse = await res.json();
   if (data.status === "authenticated" && data.session_token) {
     localStorage.setItem("session_token", data.session_token);
+    if (data.username) {
+      localStorage.setItem("username", data.username);
+    }
   }
   return data;
 }
@@ -77,6 +81,7 @@ export async function logout(): Promise<void> {
       body: JSON.stringify({ token }),
     });
     localStorage.removeItem("session_token");
+    localStorage.removeItem("username");
   }
 }
 

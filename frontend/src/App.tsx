@@ -72,9 +72,14 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>Claude Usage</h1>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="header-right">
+          {localStorage.getItem("username") && (
+            <span className="username">{localStorage.getItem("username")}</span>
+          )}
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        </div>
       </header>
 
       {error && <div className="error">{error}</div>}

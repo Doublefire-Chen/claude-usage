@@ -10,6 +10,10 @@ fn main() {
         }
     }
 
+    // Parse --user from program args (set via authorized_keys command=)
+    let args: Vec<String> = env::args().collect();
+    let username = args.iter().find_map(|a| a.strip_prefix("--user=")).map(String::from);
+
     let command = env::var("SSH_ORIGINAL_COMMAND").unwrap_or_default();
 
     let token = match parse_token(&command) {
@@ -24,10 +28,15 @@ fn main() {
         env::var("AUTH_SERVER_URL").unwrap_or_else(|_| "http://localhost:3000".into());
     let url = format!("{server_url}/internal/auth/verify");
 
+    let mut body = serde_json::json!({ "token": token });
+    if let Some(user) = &username {
+        body["username"] = serde_json::json!(user);
+    }
+
     let client = reqwest::blocking::Client::new();
     let resp = client
         .post(&url)
-        .json(&serde_json::json!({ "token": token }))
+        .json(&body)
         .send();
 
     match resp {
