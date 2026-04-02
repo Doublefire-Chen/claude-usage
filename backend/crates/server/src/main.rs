@@ -18,6 +18,7 @@ use tracing::info;
 #[derive(Clone)]
 pub struct AppState {
     pub pool: sqlx::PgPool,
+    pub ssh_user: String,
     pub ssh_host: String,
     pub ssh_port: u16,
 }
@@ -94,6 +95,7 @@ async fn main() {
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let listen_addr = std::env::var("LISTEN_ADDR").unwrap_or_else(|_| "0.0.0.0:3000".into());
+    let ssh_user = std::env::var("SSH_USER").unwrap_or_else(|_| "claude-auth".into());
     let ssh_host = std::env::var("SSH_HOST").unwrap_or_else(|_| "localhost".into());
     let ssh_port: u16 = std::env::var("SSH_PORT")
         .ok()
@@ -107,7 +109,7 @@ async fn main() {
         .await
         .expect("failed to connect to database");
 
-    let state = AppState { pool, ssh_host, ssh_port };
+    let state = AppState { pool, ssh_user, ssh_host, ssh_port };
 
     let app = Router::new()
         .route("/health", get(health))

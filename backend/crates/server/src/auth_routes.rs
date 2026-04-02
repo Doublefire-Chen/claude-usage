@@ -30,8 +30,8 @@ pub async fn create_challenge(
         format!(" -p {}", state.ssh_port)
     };
     let command = format!(
-        "ssh {}{} auth={}",
-        state.ssh_host, port_part, token
+        "ssh {}@{}{} auth={}",
+        state.ssh_user, state.ssh_host, port_part, token
     );
 
     Ok(Json(ChallengeResponse { token, command }))
