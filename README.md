@@ -42,8 +42,15 @@ All authenticated users share the same read-only view of usage data.
 ### 1. Database
 
 ```bash
-createdb claude_usage
+psql
 ```
+```
+CREATE USER claude_usage WITH PASSWORD 'strong-password';
+CREATE DATABASE claude_usage OWNER claude_usage;
+GRANT ALL PRIVILEGES ON DATABASE claude_usage TO claude_usage;
+```
+
+Tables are auto-created on first startup by the backend.
 
 ### 2. Install frontend dependencies
 
@@ -64,6 +71,7 @@ sudo chmod 700 ~claude-auth/.ssh
 Build the auth-handler binary:
 
 ```bash
+cd backend
 cargo build --release -p auth-handler
 ```
 
@@ -84,16 +92,18 @@ sudo chmod 600 ~claude-auth/.ssh/authorized_keys
 
 ```bash
 # Terminal 1: Backend API server
-DATABASE_URL=postgres://localhost/claude_usage cargo run -p server
+cd backend && DATABASE_URL=postgres://localhost/claude_usage cargo run -p server
 
 # Terminal 2: Usage collection agent
-DATABASE_URL=postgres://localhost/claude_usage cargo run -p agent
+cd backend && DATABASE_URL=postgres://localhost/claude_usage cargo run -p agent
 
 # Terminal 3: Frontend dev server (proxies /api to localhost:3000)
 cd frontend && npm run dev
 ```
 
 ### Environment Variables
+
+**Backend & Agent** (`backend/.env`):
 
 | Variable | Default | Description |
 |---|---|---|
@@ -104,6 +114,82 @@ cd frontend && npm run dev
 | `POLL_INTERVAL_SECS` | `300` | Agent polling interval (seconds) |
 | `RUST_LOG` | `info` | Log level |
 | `AUTH_SERVER_URL` | `http://localhost:3000` | Backend URL for auth-handler |
+
+**Frontend** (`frontend/.env`):
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_BASE_URL` | `/api` | Backend API base URL |
+
+### Production Build & Deploy
+
+```bash
+# Build backend (produces two binaries: server and agent)
+cd backend
+cargo build --release
+sudo mkdir -p /opt/claude-usage
+sudo cp target/release/server /opt/claude-usage/
+sudo cp target/release/agent /opt/claude-usage/
+sudo cp target/release/auth-handler /opt/claude-usage/
+
+# Configure backend & agent .env
+sudo cp .env.example /opt/claude-usage/.env
+sudo vim /opt/claude-usage/.env
+
+# Build frontend
+cd ../frontend
+cp .env.example .env
+vim .env
+npm install
+npm run build
+sudo mkdir -p /var/www/claude-usage
+sudo cp -r dist/* /var/www/claude-usage/
+```
+
+### Configure Nginx
+
+```bash
+sudo vim /etc/nginx/sites-available/claude-usage
+```
+
+Example configuration:
+
+```nginx
+server {
+    listen 80;
+    server_name claude-usage-example.com;
+
+    # Frontend
+    root /var/www/claude-usage;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /health {
+        proxy_pass http://127.0.0.1:3000;
+    }
+}
+```
+
+Enable the site and obtain SSL:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/claude-usage /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo certbot --nginx -d claude-usage-example.com
+sudo systemctl reload nginx
+```
 
 ## API Endpoints
 
@@ -121,13 +207,15 @@ cd frontend && npm run dev
 
 ```
 claude-usage/
-├── crates/
-│   ├── agent/          # Usage data collection daemon
-│   ├── auth-handler/   # SSH forced command binary
-│   ├── server/         # Axum API server
-│   └── shared/         # Shared types, DB queries, auth helpers
-├── frontend/           # Vite + React app
-└── migrations/         # PostgreSQL migrations (auto-run on startup)
+├── backend/
+│   ├── crates/
+│   │   ├── agent/          # Usage data collection daemon
+│   │   ├── auth-handler/   # SSH forced command binary
+│   │   ├── server/         # Axum API server
+│   │   └── shared/         # Shared types, DB queries, auth helpers
+│   ├── Cargo.toml
+│   └── Cargo.lock
+└── frontend/               # Vite + React app
 ```
 
 ## Features
