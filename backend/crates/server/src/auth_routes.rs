@@ -67,12 +67,15 @@ pub async fn check_status(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let cookie = Cookie::build(("session", session_token))
+    let mut cookie = Cookie::build(("session", session_token))
         .path("/")
         .http_only(true)
         .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::None)
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+    if let Some(domain) = &state.cookie_domain {
+        cookie = cookie.domain(domain.clone());
+    }
+    let cookie = cookie.build();
 
     Ok((jar.add(cookie), Json(StatusResponse { status: "authenticated".into() })))
 }
@@ -84,13 +87,16 @@ pub async fn logout(
     if let Some(cookie) = jar.get("session") {
         let _ = shared::db::delete_session(&state.pool, cookie.value()).await;
     }
-    let removal = Cookie::build(("session", ""))
+    let mut removal = Cookie::build(("session", ""))
         .path("/")
         .http_only(true)
         .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::None)
-        .removal()
-        .build();
+        .same_site(axum_extra::extract::cookie::SameSite::Lax)
+        .removal();
+    if let Some(domain) = &state.cookie_domain {
+        removal = removal.domain(domain.clone());
+    }
+    let removal = removal.build();
     Ok(jar.add(removal))
 }
 
