@@ -8,7 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { UsageSnapshot } from "./api";
+import type { UsageSnapshot } from "./api";
 
 interface Props {
   data: UsageSnapshot[];

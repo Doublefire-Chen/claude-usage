@@ -4,8 +4,8 @@ import {
   fetchHistory,
   checkSession,
   logout,
-  UsageSnapshot,
 } from "./api";
+import type { UsageSnapshot } from "./api";
 import { UsageGauge } from "./UsageGauge";
 import { UsageChart } from "./UsageChart";
 import { LoginPage } from "./LoginPage";

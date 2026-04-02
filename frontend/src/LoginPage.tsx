@@ -11,7 +11,7 @@ export function LoginPage({ onLogin }: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
   const [copied, setCopied] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const pollRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const generateChallenge = async () => {
     setExpired(false);
