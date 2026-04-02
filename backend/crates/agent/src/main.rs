@@ -106,11 +106,6 @@ async fn main() {
         .await
         .expect("failed to connect to database");
 
-    info!("running migrations...");
-    shared::db::run_migrations(&pool)
-        .await
-        .expect("failed to run migrations");
-
     let client = reqwest::Client::new();
     let interval = Duration::from_secs(poll_interval_secs);
 

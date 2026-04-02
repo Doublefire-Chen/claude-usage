@@ -2,10 +2,6 @@ use crate::models::{AuthChallenge, Session, UsageSnapshot};
 use chrono::{DateTime, Duration, Utc};
 use sqlx::PgPool;
 
-pub async fn run_migrations(pool: &PgPool) -> Result<(), sqlx::migrate::MigrateError> {
-    sqlx::migrate!("../../migrations").run(pool).await
-}
-
 pub async fn insert_usage_snapshot(
     pool: &PgPool,
     five_hour_usage: Option<f64>,

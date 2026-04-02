@@ -107,11 +107,6 @@ async fn main() {
         .await
         .expect("failed to connect to database");
 
-    info!("running migrations...");
-    shared::db::run_migrations(&pool)
-        .await
-        .expect("failed to run migrations");
-
     let state = AppState { pool, ssh_host, ssh_port };
 
     let app = Router::new()
