@@ -5,10 +5,15 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          recharts: ['recharts'],
+        codeSplitting: {
+          groups: [
+            {
+              name: 'recharts',
+              test: /node_modules\/recharts/,
+            },
+          ],
         },
       },
     },
