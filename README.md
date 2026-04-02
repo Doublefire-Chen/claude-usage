@@ -99,7 +99,17 @@ sudo chown -R claude-auth: ~claude-auth/.ssh
 sudo chmod 600 ~claude-auth/.ssh/authorized_keys
 ```
 
-### Step 5: Configure Nginx
+### Step 5: Create Systemd Service
+
+```bash
+sudo cp configs/claude-usage.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable claude-usage
+sudo systemctl start claude-usage
+sudo systemctl status claude-usage
+```
+
+### Step 6: Configure Nginx
 
 ```bash
 sudo cp configs/nginx.conf /etc/nginx/sites-available/claude-usage
@@ -111,7 +121,7 @@ sudo certbot --nginx -d claude-usage-example.com -d api.claude-usage-example.com
 sudo systemctl reload nginx
 ```
 
-### Step 6: Access Application
+### Step 7: Access Application
 
 Access the application at `https://claude-usage-example.com`.
 

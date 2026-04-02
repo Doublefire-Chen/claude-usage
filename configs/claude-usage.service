@@ -1,0 +1,19 @@
+[Unit]
+Description=claude-usage Backend Service
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/claude-usage/
+EnvironmentFile=/opt/claude-usage/.env
+ExecStart=/opt/claude-usage/server
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
