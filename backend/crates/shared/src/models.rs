@@ -2,13 +2,13 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// Raw credentials JSON stored by Claude Code.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CredentialsFile {
     #[serde(rename = "claudeAiOauth")]
     pub claude_ai_oauth: OAuthCredentials,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OAuthCredentials {
     pub access_token: String,

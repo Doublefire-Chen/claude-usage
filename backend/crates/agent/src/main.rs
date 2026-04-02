@@ -8,46 +8,78 @@ use tracing::{error, info, warn};
 const USAGE_URL: &str = "https://api.anthropic.com/api/oauth/usage";
 const DEFAULT_POLL_INTERVAL_SECS: u64 = 900;
 
-async fn fetch_usage(client: &reqwest::Client, token: &str) -> Result<UsageResponse, String> {
-    let resp = client
+enum FetchResult {
+    Ok(UsageResponse),
+    RateLimited,
+    Error(String),
+}
+
+async fn fetch_usage(client: &reqwest::Client, token: &str) -> FetchResult {
+    let resp = match client
         .get(USAGE_URL)
         .bearer_auth(token)
         .header("anthropic-beta", "oauth-2025-04-20")
         .send()
         .await
-        .map_err(|e| format!("request failed: {e}"))?;
+    {
+        Ok(r) => r,
+        Err(e) => return FetchResult::Error(format!("request failed: {e}")),
+    };
 
     let status = resp.status();
     if status == reqwest::StatusCode::UNAUTHORIZED {
-        return Err("unauthorized (401) — token may be expired, waiting for Claude Code to refresh".into());
+        return FetchResult::Error("unauthorized (401) — token may be expired".into());
     }
     if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
-        return Err("rate limited (429) — backing off".into());
+        return FetchResult::RateLimited;
     }
     if !status.is_success() {
         let body = resp.text().await.unwrap_or_default();
-        return Err(format!("unexpected status {status}: {body}"));
+        return FetchResult::Error(format!("unexpected status {status}: {body}"));
     }
 
-    resp.json::<UsageResponse>()
-        .await
-        .map_err(|e| format!("failed to parse response: {e}"))
+    match resp.json::<UsageResponse>().await {
+        Ok(u) => FetchResult::Ok(u),
+        Err(e) => FetchResult::Error(format!("failed to parse response: {e}")),
+    }
 }
 
-async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) {
+async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) -> bool {
     let token = match credentials::read_access_token() {
         Ok(t) => t,
         Err(e) => {
             error!("failed to read credentials: {e}");
-            return;
+            return false;
         }
     };
 
     let usage = match fetch_usage(client, &token).await {
-        Ok(u) => u,
-        Err(e) => {
+        FetchResult::Ok(u) => u,
+        FetchResult::RateLimited => {
+            warn!("rate limited (429) — refreshing token");
+            let new_token = match credentials::refresh_access_token(client).await {
+                Ok(t) => t,
+                Err(e) => {
+                    error!("failed to refresh token: {e}");
+                    return false;
+                }
+            };
+            info!("token refreshed successfully");
+            match fetch_usage(client, &new_token).await {
+                FetchResult::Ok(u) => u,
+                FetchResult::RateLimited => {
+                    warn!("still rate limited after refresh — skipping");
+                    return false;
+                }
+                FetchResult::Error(e) => {
+                    warn!("{e}");
+                    return false;
+                }
+            }
+        }
+        FetchResult::Error(e) => {
             warn!("{e}");
-            return;
+            return false;
         }
     };
 
@@ -82,6 +114,8 @@ async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) {
         ),
         Err(e) => error!("failed to insert snapshot: {e}"),
     }
+
+    true
 }
 
 #[tokio::main]
