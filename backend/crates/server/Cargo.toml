@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dotenvy = "0.15"
 shared = { path = "../shared" }
 axum = { version = "0.8", features = ["json"] }
 axum-extra = { version = "0.10", features = ["cookie"] }

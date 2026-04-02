@@ -86,6 +86,13 @@ async fn health() -> &'static str {
 
 #[tokio::main]
 async fn main() {
+    // Load .env from the same directory as the binary
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let _ = dotenvy::from_path(dir.join(".env"));
+        }
+    }
+
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
