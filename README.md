@@ -93,8 +93,8 @@ sudo chmod 700 ~claude-auth/.ssh
 Add authorized SSH public keys (admin-managed only):
 
 ```bash
-# For each user, add a line to authorized_keys:
-echo 'command="/opt/claude-usage/auth-handler",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAA... user@host' \
+# For each user, add a line to authorized_keys (replace user@host with the display name):
+echo 'command="/opt/claude-usage/auth-handler --user=user@host",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty ssh-ed25519 AAAA... user@host' \
   | sudo tee -a ~claude-auth/.ssh/authorized_keys
 
 sudo chown -R claude-auth: ~claude-auth/.ssh
