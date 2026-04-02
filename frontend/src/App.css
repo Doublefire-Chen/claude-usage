@@ -50,55 +50,80 @@
   margin-bottom: 1rem;
 }
 
-/* Gauges */
+/* Gauges — Claude.ai official style */
 .gauges {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.gauge {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+.gauge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 2rem;
+}
+
+.gauge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 13rem;
+  flex-shrink: 0;
 }
 
 .gauge-label {
-  font-size: 0.85rem;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.gauge-reset {
+  margin: 0;
+  font-size: 0.875rem;
   color: var(--text);
-  margin-bottom: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.gauge-bar-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  max-width: 36rem;
 }
 
 .gauge-bar-track {
-  height: 8px;
-  background: var(--border);
+  flex: 1;
+  min-width: 200px;
+  height: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  margin-bottom: 0.75rem;
 }
 
 .gauge-bar-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: 3px;
+  background: var(--accent);
   transition: width 0.5s ease;
 }
 
 .gauge-value {
-  font-size: 1.75rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.gauge-reset {
-  font-size: 0.8rem;
+  margin: 0;
+  font-size: 0.875rem;
   color: var(--text);
-  margin-top: 0.25rem;
+  white-space: nowrap;
+  text-align: right;
+  min-width: 5.5rem;
 }
 
 .sub-type {

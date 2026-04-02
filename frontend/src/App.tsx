@@ -82,17 +82,17 @@ function App() {
       {current && (
         <div className="gauges">
           <UsageGauge
-            label="5-Hour"
+            label="Current session"
             value={current.five_hour_usage}
             resetsAt={current.five_hour_resets_at}
           />
           <UsageGauge
-            label="7-Day"
+            label="All models"
             value={current.seven_day_usage}
             resetsAt={current.seven_day_resets_at}
           />
           <UsageGauge
-            label="7-Day Sonnet"
+            label="Sonnet only"
             value={current.seven_day_sonnet_usage}
             resetsAt={null}
           />
