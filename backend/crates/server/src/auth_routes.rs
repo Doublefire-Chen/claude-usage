@@ -70,7 +70,8 @@ pub async fn check_status(
     let cookie = Cookie::build(("session", session_token))
         .path("/")
         .http_only(true)
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
+        .secure(true)
+        .same_site(axum_extra::extract::cookie::SameSite::None)
         .build();
 
     Ok((jar.add(cookie), Json(StatusResponse { status: "authenticated".into() })))
@@ -86,6 +87,8 @@ pub async fn logout(
     let removal = Cookie::build(("session", ""))
         .path("/")
         .http_only(true)
+        .secure(true)
+        .same_site(axum_extra::extract::cookie::SameSite::None)
         .removal()
         .build();
     Ok(jar.add(removal))

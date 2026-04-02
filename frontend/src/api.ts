@@ -1,5 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+function api(url: string, options?: RequestInit): Promise<Response> {
+  return fetch(`${API_BASE_URL}${url}`, { credentials: "include", ...options });
+}
+
 export interface UsageSnapshot {
   id: number;
   timestamp: string;
@@ -12,7 +16,7 @@ export interface UsageSnapshot {
 }
 
 export async function fetchCurrent(): Promise<UsageSnapshot | null> {
-  const res = await fetch(`${API_BASE_URL}/usage/current`);
+  const res = await api("/usage/current");
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -29,7 +33,7 @@ export interface StatusResponse {
 }
 
 export async function createChallenge(): Promise<ChallengeResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/challenge`, { method: "POST" });
+  const res = await api("/auth/challenge", { method: "POST" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -37,18 +41,18 @@ export async function createChallenge(): Promise<ChallengeResponse> {
 export async function checkChallengeStatus(
   token: string
 ): Promise<StatusResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/status?token=${token}`);
+  const res = await api(`/auth/status?token=${token}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 export async function checkSession(): Promise<boolean> {
-  const res = await fetch(`${API_BASE_URL}/usage/current`);
+  const res = await api("/usage/current");
   return res.ok;
 }
 
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST" });
+  await api("/auth/logout", { method: "POST" });
 }
 
 // --- Usage ---
@@ -60,7 +64,7 @@ export async function fetchHistory(
   const params = new URLSearchParams();
   if (from) params.set("from", from);
   if (to) params.set("to", to);
-  const res = await fetch(`${API_BASE_URL}/usage/history?${params}`);
+  const res = await api(`/usage/history?${params}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }

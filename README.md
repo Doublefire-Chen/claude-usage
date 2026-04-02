@@ -66,12 +66,14 @@ sudo cp target/release/server /opt/claude-usage/
 sudo cp target/release/auth-handler /opt/claude-usage/
 
 # Configure backend .env
+# Set FRONTEND_URL to your frontend domain (e.g. https://claude-usage-example.com)
 sudo cp .env /opt/claude-usage/.env
 sudo vim /opt/claude-usage/.env
 
 # Build frontend
 cd ../frontend
-cp .env.example .env  # edit as needed
+cp .env.example .env
+# Set VITE_API_URL to your backend API domain (e.g. https://api.claude-usage-example.com)
 npm install
 npm run build
 sudo mkdir -p /var/www/claude-usage

@@ -12,7 +12,7 @@ use middleware::AuthUser;
 use serde::{Deserialize, Serialize};
 use shared::models::UsageSnapshot;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::info;
 
 #[derive(Clone)]
@@ -93,6 +93,7 @@ async fn main() {
         )
         .init();
 
+    let frontend_url = std::env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:5173".into());
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let listen_addr = std::env::var("LISTEN_ADDR").unwrap_or_else(|_| "0.0.0.0:3000".into());
     let ssh_user = std::env::var("SSH_USER").unwrap_or_else(|_| "claude-auth".into());
@@ -119,7 +120,13 @@ async fn main() {
         .route("/auth/status", get(auth_routes::check_status))
         .route("/auth/logout", post(auth_routes::logout))
         .route("/internal/auth/verify", post(auth_routes::verify))
-        .layer(CorsLayer::permissive())
+        .layer(
+            CorsLayer::new()
+                .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
+                .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
+                .allow_headers([axum::http::header::CONTENT_TYPE])
+                .allow_credentials(true),
+        )
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind(&listen_addr)
