@@ -13,7 +13,7 @@ fn main() {
 
     let server_url =
         env::var("AUTH_SERVER_URL").unwrap_or_else(|_| "http://localhost:3000".into());
-    let url = format!("{server_url}/api/internal/auth/verify");
+    let url = format!("{server_url}/internal/auth/verify");
 
     let client = reqwest::blocking::Client::new();
     let resp = client

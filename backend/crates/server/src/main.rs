@@ -111,12 +111,12 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", get(health))
-        .route("/api/usage/current", get(get_current))
-        .route("/api/usage/history", get(get_history))
-        .route("/api/auth/challenge", post(auth_routes::create_challenge))
-        .route("/api/auth/status", get(auth_routes::check_status))
-        .route("/api/auth/logout", post(auth_routes::logout))
-        .route("/api/internal/auth/verify", post(auth_routes::verify))
+        .route("/usage/current", get(get_current))
+        .route("/usage/history", get(get_history))
+        .route("/auth/challenge", post(auth_routes::create_challenge))
+        .route("/auth/status", get(auth_routes::check_status))
+        .route("/auth/logout", post(auth_routes::logout))
+        .route("/internal/auth/verify", post(auth_routes::verify))
         .layer(CorsLayer::permissive())
         .with_state(state);
 
