@@ -39,7 +39,15 @@ All authenticated users share the same read-only view of usage data.
 
 ## Setup
 
-### 1. Database
+### 1. Clone Repository
+
+```bash
+cd ~
+git clone https://github.com/Doublefire-Chen/claude-usage.git
+cd claude-usage
+```
+
+### 2. Database
 
 ```bash
 psql
@@ -52,13 +60,13 @@ GRANT ALL PRIVILEGES ON DATABASE claude_usage TO claude_usage;
 
 Tables are auto-created on first startup by the backend.
 
-### 2. Install frontend dependencies
+### 3. Install frontend dependencies
 
 ```bash
 cd frontend && npm install
 ```
 
-### 3. SSH auth (production)
+### 4. SSH auth (production)
 
 Create a dedicated system user for SSH authentication:
 
