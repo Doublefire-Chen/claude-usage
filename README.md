@@ -147,15 +147,14 @@ cd claude-usage/backend
 cargo build --release -p agent
 ```
 
-### Step 2: Configure
+### Step 2: Configure and Run
+
+Create a `.env` file next to the binary:
 
 ```bash
-# Agent only needs DATABASE_URL and optionally POLL_INTERVAL_SECS
-export DATABASE_URL=postgres://claude_usage:strong-password@your-db-host/claude_usage
-export POLL_INTERVAL_SECS=300  # default: 300 (5 minutes)
+cp .env.example target/release/.env
+vim target/release/.env  # set DATABASE_URL to your remote database
 ```
-
-### Step 3: Run
 
 ```bash
 ./target/release/agent
