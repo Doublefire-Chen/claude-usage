@@ -14,16 +14,18 @@ pub enum CredentialsError {
 }
 
 /// Read Claude Code OAuth credentials.
-/// macOS: reads from Keychain ("Claude Code-credentials").
-/// Linux: reads from ~/.claude/.credentials.json.
+/// Priority: CLAUDE_CODE_OAUTH_TOKEN env var > ~/.claude/.credentials.json > macOS Keychain.
 pub fn read_credentials() -> Result<CredentialsFile, CredentialsError> {
+    if let Ok(creds) = read_from_file() {
+        return Ok(creds);
+    }
     #[cfg(target_os = "macos")]
     {
-        read_from_keychain()
+        return read_from_keychain();
     }
     #[cfg(not(target_os = "macos"))]
     {
-        read_from_file()
+        Err(CredentialsError::NotFound)
     }
 }
 
@@ -44,7 +46,6 @@ fn read_from_keychain() -> Result<CredentialsFile, CredentialsError> {
     Ok(creds)
 }
 
-#[cfg(not(target_os = "macos"))]
 fn read_from_file() -> Result<CredentialsFile, CredentialsError> {
     let path = dirs::home_dir()
         .map(|h| h.join(".claude").join(".credentials.json"))
@@ -58,7 +59,11 @@ fn read_from_file() -> Result<CredentialsFile, CredentialsError> {
 }
 
 /// Convenience: extract just the access token.
+/// Checks CLAUDE_CODE_OAUTH_TOKEN env var first.
 pub fn read_access_token() -> Result<String, CredentialsError> {
+    if let Ok(token) = std::env::var("CLAUDE_CODE_OAUTH_TOKEN") {
+        return Ok(token);
+    }
     let creds = read_credentials()?;
     Ok(creds.claude_ai_oauth.access_token)
 }
