@@ -1,6 +1,15 @@
 use std::env;
+use std::path::PathBuf;
 
 fn main() {
+    // Load .env from the same directory as the binary
+    if let Ok(exe) = env::current_exe() {
+        if let Some(dir) = exe.parent() {
+            let env_path: PathBuf = dir.join(".env");
+            let _ = dotenvy::from_path(&env_path);
+        }
+    }
+
     let command = env::var("SSH_ORIGINAL_COMMAND").unwrap_or_default();
 
     let token = match parse_token(&command) {
