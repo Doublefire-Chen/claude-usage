@@ -83,7 +83,7 @@ sudo cp -r dist/* /var/www/claude-usage/
 Create a dedicated system user for SSH authentication:
 
 ```bash
-sudo useradd -r -s /usr/sbin/nologin -m claude-auth
+sudo useradd -r -s /bin/bash -m claude-auth
 sudo mkdir -p ~claude-auth/.ssh
 sudo chmod 700 ~claude-auth/.ssh
 ```
