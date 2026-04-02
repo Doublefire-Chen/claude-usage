@@ -22,7 +22,9 @@ SSH key-based authentication using the system's OpenSSH server:
 
 ---
 
-## How to Install (Ubuntu as example)
+## Server Setup (Ubuntu as example)
+
+Deploys the backend API, frontend, and SSH auth on a server.
 
 ### Prerequisites
 
@@ -55,13 +57,12 @@ Use [./backend/db_schema/schema.sql](backend/db_schema/schema.sql) to create the
 ### Step 3: Build Application
 
 ```bash
-# Build backend (produces three binaries: server, agent, auth-handler)
+# Build backend (produces server and auth-handler binaries)
 cd backend
 cp .env.example .env  # edit as needed
 cargo build --release
 sudo mkdir -p /opt/claude-usage
 sudo cp target/release/server /opt/claude-usage/
-sudo cp target/release/agent /opt/claude-usage/
 sudo cp target/release/auth-handler /opt/claude-usage/
 
 # Configure backend .env
@@ -113,3 +114,39 @@ sudo systemctl reload nginx
 ### Step 6: Access Application
 
 Access the application at `https://claude-usage-example.com`.
+
+---
+
+## Agent Setup (Linux / macOS)
+
+The agent runs on the machine where Claude Code is active. It reads the OAuth token from Claude Code's credentials (macOS Keychain or `~/.claude/.credentials.json` on Linux) and periodically polls the usage API, writing snapshots to PostgreSQL.
+
+### Prerequisites
+
+- Rust (stable)
+- Network access to the PostgreSQL database
+
+### Step 1: Clone and Build
+
+```bash
+cd ~
+git clone https://github.com/Doublefire-Chen/claude-usage.git
+cd claude-usage/backend
+cargo build --release -p agent
+```
+
+### Step 2: Configure
+
+```bash
+# Agent only needs DATABASE_URL and optionally POLL_INTERVAL_SECS
+export DATABASE_URL=postgres://claude_usage:strong-password@your-db-host/claude_usage
+export POLL_INTERVAL_SECS=300  # default: 300 (5 minutes)
+```
+
+### Step 3: Run
+
+```bash
+./target/release/agent
+```
+
+The agent will poll immediately on start, then every `POLL_INTERVAL_SECS` seconds. It connects directly to PostgreSQL, so ensure the database is accessible from this machine.
