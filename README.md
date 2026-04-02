@@ -106,7 +106,7 @@ sudo vim /etc/nginx/sites-available/claude-usage
 
 sudo ln -s /etc/nginx/sites-available/claude-usage /etc/nginx/sites-enabled/
 sudo nginx -t
-sudo certbot --nginx -d claude-usage-example.com
+sudo certbot --nginx -d claude-usage-example.com -d api.claude-usage-example.com
 sudo systemctl reload nginx
 ```
 
