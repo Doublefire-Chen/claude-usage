@@ -2,11 +2,10 @@ use axum::{
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
 };
-use axum_extra::extract::CookieJar;
 
 use crate::AppState;
 
-/// Extractor that validates the session cookie.
+/// Extractor that validates the Bearer token.
 /// Add as a parameter to any handler that requires authentication.
 pub struct AuthUser;
 
@@ -17,13 +16,11 @@ impl FromRequestParts<AppState> for AuthUser {
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let jar = CookieJar::from_request_parts(parts, state)
-            .await
-            .map_err(|_| StatusCode::UNAUTHORIZED)?;
-
-        let token = jar
-            .get("session")
-            .map(|c| c.value())
+        let token = parts
+            .headers
+            .get("authorization")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("Bearer "))
             .ok_or(StatusCode::UNAUTHORIZED)?;
 
         shared::db::get_session(&state.pool, token)

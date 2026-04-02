@@ -3,7 +3,6 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use axum_extra::extract::cookie::{Cookie, CookieJar};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 
@@ -45,20 +44,21 @@ pub struct StatusQuery {
 #[derive(Serialize)]
 pub struct StatusResponse {
     status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    session_token: Option<String>,
 }
 
 pub async fn check_status(
     State(state): State<AppState>,
     Query(params): Query<StatusQuery>,
-    jar: CookieJar,
-) -> Result<(CookieJar, Json<StatusResponse>), StatusCode> {
+) -> Result<Json<StatusResponse>, StatusCode> {
     let challenge = shared::db::get_auth_challenge(&state.pool, &params.token)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .ok_or(StatusCode::NOT_FOUND)?;
 
     if challenge.status != "authenticated" {
-        return Ok((jar, Json(StatusResponse { status: "pending".into() })));
+        return Ok(Json(StatusResponse { status: "pending".into(), session_token: None }));
     }
 
     // Challenge is authenticated — create a session
@@ -67,37 +67,23 @@ pub async fn check_status(
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let mut cookie = Cookie::build(("session", session_token))
-        .path("/")
-        .http_only(true)
-        .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::None);
-    if let Some(domain) = &state.cookie_domain {
-        cookie = cookie.domain(domain.clone());
-    }
-    let cookie = cookie.build();
+    Ok(Json(StatusResponse {
+        status: "authenticated".into(),
+        session_token: Some(session_token),
+    }))
+}
 
-    Ok((jar.add(cookie), Json(StatusResponse { status: "authenticated".into() })))
+#[derive(Deserialize)]
+pub struct LogoutRequest {
+    token: String,
 }
 
 pub async fn logout(
     State(state): State<AppState>,
-    jar: CookieJar,
-) -> Result<CookieJar, StatusCode> {
-    if let Some(cookie) = jar.get("session") {
-        let _ = shared::db::delete_session(&state.pool, cookie.value()).await;
-    }
-    let mut removal = Cookie::build(("session", ""))
-        .path("/")
-        .http_only(true)
-        .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::None)
-        .removal();
-    if let Some(domain) = &state.cookie_domain {
-        removal = removal.domain(domain.clone());
-    }
-    let removal = removal.build();
-    Ok(jar.add(removal))
+    Json(body): Json<LogoutRequest>,
+) -> StatusCode {
+    let _ = shared::db::delete_session(&state.pool, &body.token).await;
+    StatusCode::OK
 }
 
 // Internal endpoint called by auth-handler binary (localhost only)

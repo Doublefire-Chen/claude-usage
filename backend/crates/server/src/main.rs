@@ -18,7 +18,6 @@ use tracing::info;
 #[derive(Clone)]
 pub struct AppState {
     pub pool: sqlx::PgPool,
-    pub cookie_domain: Option<String>,
     pub ssh_user: String,
     pub ssh_host: String,
     pub ssh_port: u16,
@@ -118,10 +117,7 @@ async fn main() {
         .await
         .expect("failed to connect to database");
 
-    let cookie_domain = url::Url::parse(&frontend_url)
-        .ok()
-        .and_then(|u| u.host_str().map(|h| format!(".{h}")));
-    let state = AppState { pool, cookie_domain, ssh_user, ssh_host, ssh_port };
+    let state = AppState { pool, ssh_user, ssh_host, ssh_port };
 
     let app = Router::new()
         .route("/health", get(health))
@@ -135,8 +131,7 @@ async fn main() {
             CorsLayer::new()
                 .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
                 .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
-                .allow_headers([axum::http::header::CONTENT_TYPE])
-                .allow_credentials(true),
+                .allow_headers([axum::http::header::CONTENT_TYPE, axum::http::header::AUTHORIZATION]),
         )
         .with_state(state);
 

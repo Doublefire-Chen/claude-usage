@@ -1,7 +1,18 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+function getToken(): string | null {
+  return localStorage.getItem("session_token");
+}
+
 function api(url: string, options?: RequestInit): Promise<Response> {
-  return fetch(`${API_BASE_URL}${url}`, { credentials: "include", ...options });
+  const token = getToken();
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return fetch(`${API_BASE_URL}${url}`, { ...options, headers });
 }
 
 export interface UsageSnapshot {
@@ -30,6 +41,7 @@ export interface ChallengeResponse {
 
 export interface StatusResponse {
   status: "pending" | "authenticated";
+  session_token?: string;
 }
 
 export async function createChallenge(): Promise<ChallengeResponse> {
@@ -43,16 +55,29 @@ export async function checkChallengeStatus(
 ): Promise<StatusResponse> {
   const res = await api(`/auth/status?token=${token}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  const data: StatusResponse = await res.json();
+  if (data.status === "authenticated" && data.session_token) {
+    localStorage.setItem("session_token", data.session_token);
+  }
+  return data;
 }
 
 export async function checkSession(): Promise<boolean> {
+  if (!getToken()) return false;
   const res = await api("/usage/current");
   return res.ok;
 }
 
 export async function logout(): Promise<void> {
-  await api("/auth/logout", { method: "POST" });
+  const token = getToken();
+  if (token) {
+    await api("/auth/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    localStorage.removeItem("session_token");
+  }
 }
 
 // --- Usage ---
