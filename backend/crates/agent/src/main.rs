@@ -6,7 +6,7 @@ use tokio::signal;
 use tracing::{error, info, warn};
 
 const USAGE_URL: &str = "https://api.anthropic.com/api/oauth/usage";
-const DEFAULT_POLL_INTERVAL_SECS: u64 = 300;
+const DEFAULT_POLL_INTERVAL_SECS: u64 = 900;
 
 async fn fetch_usage(client: &reqwest::Client, token: &str) -> Result<UsageResponse, String> {
     let resp = client
@@ -114,19 +114,21 @@ async fn main() {
         .expect("failed to connect to database");
 
     let client = reqwest::Client::new();
-    let interval = Duration::from_secs(poll_interval_secs);
 
     info!(interval_secs = poll_interval_secs, "agent started");
 
-    // Poll immediately on start, then on interval
+    // Poll immediately on start
     poll_once(&client, &pool).await;
 
-    let mut ticker = tokio::time::interval(interval);
-    ticker.tick().await; // consume the immediate first tick
-
     loop {
+        // Sleep until the next aligned time (e.g., :00, :15, :30, :45 for 900s)
+        let now = chrono::Utc::now().timestamp() as u64;
+        let next = ((now / poll_interval_secs) + 1) * poll_interval_secs;
+        let sleep_secs = next - now;
+        info!(next_poll_in_secs = sleep_secs, "waiting for next aligned interval");
+
         tokio::select! {
-            _ = ticker.tick() => {
+            _ = tokio::time::sleep(Duration::from_secs(sleep_secs)) => {
                 poll_once(&client, &pool).await;
             }
             _ = signal::ctrl_c() => {
