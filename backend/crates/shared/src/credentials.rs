@@ -1,4 +1,4 @@
-use crate::models::{CredentialsFile, OAuthCredentials};
+use crate::models::CredentialsFile;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
