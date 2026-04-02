@@ -129,7 +129,11 @@ async fn main() {
         .route("/internal/auth/verify", post(auth_routes::verify))
         .layer(
             CorsLayer::new()
-                .allow_origin(AllowOrigin::exact(frontend_url.parse().unwrap()))
+                .allow_origin(AllowOrigin::list([
+                    frontend_url.parse().unwrap(),
+                    "http://localhost:5173".parse().unwrap(),
+                    "http://localhost:3000".parse().unwrap(),
+                ]))
                 .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
                 .allow_headers([axum::http::header::CONTENT_TYPE, axum::http::header::AUTHORIZATION]),
         )
