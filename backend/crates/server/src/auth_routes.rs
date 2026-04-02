@@ -71,7 +71,7 @@ pub async fn check_status(
         .path("/")
         .http_only(true)
         .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::Lax);
+        .same_site(axum_extra::extract::cookie::SameSite::None);
     if let Some(domain) = &state.cookie_domain {
         cookie = cookie.domain(domain.clone());
     }
@@ -91,7 +91,7 @@ pub async fn logout(
         .path("/")
         .http_only(true)
         .secure(true)
-        .same_site(axum_extra::extract::cookie::SameSite::Lax)
+        .same_site(axum_extra::extract::cookie::SameSite::None)
         .removal();
     if let Some(domain) = &state.cookie_domain {
         removal = removal.domain(domain.clone());
