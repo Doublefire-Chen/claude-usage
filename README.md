@@ -58,7 +58,13 @@ CREATE DATABASE claude_usage OWNER claude_usage;
 GRANT ALL PRIVILEGES ON DATABASE claude_usage TO claude_usage;
 ```
 
-Tables are auto-created on first startup by the backend.
+Initialize the schema:
+
+```bash
+psql -U claude_usage -d claude_usage -f backend/db_schema/schema.sql
+```
+
+See [`backend/db_schema/`](backend/db_schema/) for the full schema definition.
 
 ### 3. Install frontend dependencies
 
@@ -216,6 +222,7 @@ sudo systemctl reload nginx
 ```
 claude-usage/
 ├── backend/
+│   ├── db_schema/         # PostgreSQL schema definitions
 │   ├── crates/
 │   │   ├── agent/          # Usage data collection daemon
 │   │   ├── auth-handler/   # SSH forced command binary
