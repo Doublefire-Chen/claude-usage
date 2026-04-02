@@ -4,13 +4,15 @@
   --bg: #f5f5f0;
   --card-bg: #ffffff;
   --border: #e6e2dc;
+  --bar-bg: #ffffff;
+  --bar-border: rgba(31, 30, 29, 0.15);
   --accent: #c15f3c;
   --accent-hover: #a14a2f;
   --color-ok: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
-  font: 16px/1.6 ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font: 16px/1.5 "Anthropic Sans", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -24,6 +26,8 @@
     --bg: #1a1815;
     --card-bg: #242220;
     --border: #3a3632;
+    --bar-bg: #2a2826;
+    --bar-border: rgba(255, 255, 255, 0.12);
     --accent: #d97757;
     --accent-hover: #c15f3c;
   }
