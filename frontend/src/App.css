@@ -20,6 +20,7 @@
 
 .app-header h1 {
   margin: 0;
+  font-size: 1.5rem;
 }
 
 .logout-btn {
@@ -27,11 +28,13 @@
   right: 0;
   padding: 0.4rem 0.8rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--card-bg);
   color: var(--text);
   cursor: pointer;
   font-size: 0.85rem;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .logout-btn:hover {
@@ -43,7 +46,7 @@
   background: var(--color-danger);
   color: white;
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 1rem;
 }
 
@@ -58,15 +61,16 @@
 .gauge {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 16px;
+  padding: 1.5rem;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .gauge-label {
   font-size: 0.85rem;
   color: var(--text);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -76,7 +80,7 @@
   background: var(--border);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .gauge-bar-fill {
@@ -114,11 +118,13 @@
 .range-picker button {
   padding: 0.4rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--card-bg);
   color: var(--text);
   cursor: pointer;
   font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.15s;
 }
 
 .range-picker button.active {
@@ -127,12 +133,18 @@
   border-color: var(--accent);
 }
 
+.range-picker button:hover:not(.active) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* Chart */
 .chart-container {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .no-data {

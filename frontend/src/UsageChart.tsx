@@ -47,29 +47,30 @@ export function UsageChart({ data }: Props) {
           />
           <Tooltip
             contentStyle={{
-              background: "var(--bg)",
+              background: "var(--card-bg)",
               border: "1px solid var(--border)",
+              borderRadius: "8px",
             }}
           />
           <Legend />
           <Line
             type="monotone"
             dataKey="5h"
-            stroke="#3b82f6"
+            stroke="#c15f3c"
             strokeWidth={2}
             dot={false}
           />
           <Line
             type="monotone"
             dataKey="7d"
-            stroke="#8b5cf6"
+            stroke="#d97757"
             strokeWidth={2}
             dot={false}
           />
           <Line
             type="monotone"
             dataKey="7d Sonnet"
-            stroke="#f59e0b"
+            stroke="#a14a2f"
             strokeWidth={2}
             dot={false}
           />
