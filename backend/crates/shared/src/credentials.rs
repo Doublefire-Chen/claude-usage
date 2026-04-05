@@ -85,10 +85,11 @@ pub async fn refresh_access_token(client: &reqwest::Client) -> Result<String, Cr
 
     let resp = client
         .post("https://console.anthropic.com/v1/oauth/token")
-        .form(&[
-            ("grant_type", "refresh_token"),
-            ("refresh_token", refresh_token),
-        ])
+        .json(&serde_json::json!({
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
+        }))
         .send()
         .await
         .map_err(|e| CredentialsError::Other(format!("refresh request failed: {e}")))?;
