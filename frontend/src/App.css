@@ -184,6 +184,29 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  padding-top: 0.75rem;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chart-legend-item input {
+  cursor: pointer;
+  accent-color: var(--accent);
+  margin: 0;
+}
+
 .no-data {
   text-align: center;
   color: var(--text);
