@@ -12,25 +12,27 @@ import type { UsageSnapshot } from "./api";
 
 interface Props {
   data: UsageSnapshot[];
+  range: string;
 }
 
-function formatLabel(iso: string): string {
+function formatLabel(iso: string, showDate: boolean): string {
   const d = new Date(iso);
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
   const hour = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
+  if (!showDate) return `${hour}:${min}`;
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${month}-${day} ${hour}:${min}`;
 }
 
-export function UsageChart({ data }: Props) {
+export function UsageChart({ data, range }: Props) {
   if (data.length === 0) {
     return <p className="no-data">No usage data yet.</p>;
   }
 
   const chartData = data.map((d, i) => ({
     idx: i,
-    label: formatLabel(d.timestamp),
+    label: formatLabel(d.timestamp, range !== "24h"),
     "5h": d.five_hour_usage,
     "7d": d.seven_day_usage,
     "7d Sonnet": d.seven_day_sonnet_usage,

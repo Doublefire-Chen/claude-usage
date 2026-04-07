@@ -120,7 +120,7 @@ function App() {
         ))}
       </div>
 
-      <UsageChart data={history} />
+      <UsageChart data={history} range={range} />
     </div>
   );
 }
