@@ -54,7 +54,8 @@ export function UsageChart({ data, range }: Props) {
       key = `${date.getMonth()}-${date.getDate()}`;
       if (date.getHours() > 1) continue;
     } else {
-      // Every day at ~00:00
+      // Every Monday at ~00:00
+      if (date.getDay() !== 1) continue;
       key = `${date.getMonth()}-${date.getDate()}`;
       if (date.getHours() > 1) continue;
     }
