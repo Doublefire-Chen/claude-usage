@@ -9,8 +9,10 @@ function formatResetTime(iso: string): string {
   const now = new Date();
   const diffMs = d.getTime() - now.getTime();
   if (diffMs <= 0) return "Resetting...";
-  const hours = Math.floor(diffMs / 3_600_000);
+  const days = Math.floor(diffMs / 86_400_000);
+  const hours = Math.floor((diffMs % 86_400_000) / 3_600_000);
   const mins = Math.floor((diffMs % 3_600_000) / 60_000);
+  if (days > 0) return `Resets in ${days} d ${hours} hr ${mins} min`;
   if (hours > 0) return `Resets in ${hours} hr ${mins} min`;
   return `Resets in ${mins} min`;
 }
