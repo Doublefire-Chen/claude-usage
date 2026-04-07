@@ -23,6 +23,20 @@
   font-size: 1.5rem;
 }
 
+.header-left {
+  position: absolute;
+  left: 0;
+}
+
+.github-link {
+  color: var(--text);
+  transition: color 0.15s;
+}
+
+.github-link:hover {
+  color: var(--text-h);
+}
+
 .header-right {
   position: absolute;
   right: 0;
