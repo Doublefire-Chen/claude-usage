@@ -15,14 +15,15 @@ interface Props {
   range: string;
 }
 
-function formatLabel(iso: string, showDate: boolean): string {
+function formatLabel(iso: string, range: string): string {
   const d = new Date(iso);
   const hour = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
-  if (!showDate) return `${hour}:${min}`;
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${month}-${day} ${hour}:${min}`;
+  if (range === "24h") return `${hour}:${min}`;
+  if (range === "7d") return `${month}-${day}`;
+  return `${month}-${day}`;
 }
 
 export function UsageChart({ data, range }: Props) {
@@ -32,7 +33,7 @@ export function UsageChart({ data, range }: Props) {
 
   const chartData = data.map((d, i) => ({
     idx: i,
-    label: formatLabel(d.timestamp, range !== "24h"),
+    label: formatLabel(d.timestamp, range),
     "5h": d.five_hour_usage,
     "7d": d.seven_day_usage,
     "7d Sonnet": d.seven_day_sonnet_usage,
@@ -49,10 +50,9 @@ export function UsageChart({ data, range }: Props) {
       key = `${date.getHours()}`;
       if (date.getMinutes() > 15) continue;
     } else if (range === "7d") {
-      // Every 6 hours
-      const h = Math.round(date.getHours() / 6) * 6;
-      key = `${date.getMonth()}-${date.getDate()}-${h}`;
-      if (date.getMinutes() > 15 && date.getHours() % 6 !== 0) continue;
+      // Once per day at ~00:00
+      key = `${date.getMonth()}-${date.getDate()}`;
+      if (date.getHours() > 1) continue;
     } else {
       // Every day at ~00:00
       key = `${date.getMonth()}-${date.getDate()}`;
