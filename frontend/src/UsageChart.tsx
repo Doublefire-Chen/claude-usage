@@ -38,11 +38,31 @@ export function UsageChart({ data, range }: Props) {
     "7d Sonnet": d.seven_day_sonnet_usage,
   }));
 
-  // Show ~10 evenly spaced tick labels
-  const step = Math.max(1, Math.floor(chartData.length / 10));
-  const ticks = chartData
-    .filter((_, i) => i % step === 0)
-    .map((d) => d.idx);
+  // Pick ticks at round time boundaries
+  const ticks: number[] = [];
+  const seen = new Set<string>();
+  for (const d of data) {
+    const date = new Date(d.timestamp);
+    let key: string;
+    if (range === "24h") {
+      // Every whole hour
+      key = `${date.getHours()}`;
+      if (date.getMinutes() > 15) continue;
+    } else if (range === "7d") {
+      // Every 6 hours
+      const h = Math.round(date.getHours() / 6) * 6;
+      key = `${date.getMonth()}-${date.getDate()}-${h}`;
+      if (date.getMinutes() > 15 && date.getHours() % 6 !== 0) continue;
+    } else {
+      // Every day at ~00:00
+      key = `${date.getMonth()}-${date.getDate()}`;
+      if (date.getHours() > 1) continue;
+    }
+    if (!seen.has(key)) {
+      seen.add(key);
+      ticks.push(data.indexOf(d));
+    }
+  }
 
   return (
     <div className="chart-container">
