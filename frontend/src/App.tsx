@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   fetchCurrent,
   fetchHistory,
@@ -11,6 +11,53 @@ import { UsageChart } from "./UsageChart";
 import { LoginPage } from "./LoginPage";
 import "./App.css";
 
+const SPARKLE_CHARS = ["·", "✻", "✽", "✶", "✳", "✢"];
+
+function ClaudeSparkle() {
+  const [idx, setIdx] = useState(0);
+  const ref = useRef<ReturnType<typeof setInterval>>(undefined);
+  useEffect(() => {
+    ref.current = setInterval(() => {
+      setIdx((i) => (i + 1) % SPARKLE_CHARS.length);
+    }, 120);
+    return () => clearInterval(ref.current);
+  }, []);
+  return <span className="claude-sparkle">{SPARKLE_CHARS[idx]}</span>;
+}
+
+function useAnimatedFavicon() {
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext("2d")!;
+    const link = document.getElementById("favicon") as HTMLLinkElement;
+    const img = new Image();
+    img.src = "/favicon.svg";
+
+    let t = 0;
+    let raf: number;
+
+    img.onload = () => {
+      function draw() {
+        const scale = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t));
+        const size = 32 * scale;
+        const offset = (32 - size) / 2;
+        ctx.clearRect(0, 0, 32, 32);
+        ctx.globalAlpha = 0.4 + 0.6 * scale;
+        ctx.drawImage(img, offset, offset, size, size);
+        ctx.globalAlpha = 1;
+        link.href = canvas.toDataURL("image/png");
+        t += 0.06;
+        raf = requestAnimationFrame(draw);
+      }
+      draw();
+    };
+
+    return () => cancelAnimationFrame(raf);
+  }, []);
+}
+
 type TimeRange = "24h" | "7d" | "30d";
 
 function rangeToFrom(range: TimeRange): string {
@@ -20,6 +67,7 @@ function rangeToFrom(range: TimeRange): string {
 }
 
 function App() {
+  useAnimatedFavicon();
   const [authed, setAuthed] = useState<boolean | null>(null); // null = loading
   const [current, setCurrent] = useState<UsageSnapshot | null>(null);
   const [history, setHistory] = useState<UsageSnapshot[]>([]);
@@ -78,7 +126,7 @@ function App() {
             </svg>
           </a>
         </div>
-        <h1>Claude Usage</h1>
+        <h1><ClaudeSparkle /> Claude Usage</h1>
         <div className="header-right">
           {localStorage.getItem("username") && (
             <span className="username">{localStorage.getItem("username")}</span>

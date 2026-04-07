@@ -21,6 +21,17 @@
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.claude-sparkle {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  color: #d97757;
+  font-size: 1.2em;
 }
 
 .header-left {
