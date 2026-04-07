@@ -17,9 +17,9 @@ interface Props {
 }
 
 const LINES = [
-  { key: "5h", label: "5h", color: "#4889f4" },
+  { key: "5h", label: "5h", color: "#e05c7a" },
   { key: "7d", label: "7d", color: "#d97757" },
-  { key: "7d Sonnet", label: "7d Sonnet", color: "#22c55e" },
+  { key: "7d Sonnet", label: "7d Sonnet", color: "#e5a336" },
 ];
 
 function formatLabel(iso: string, range: string): string {
