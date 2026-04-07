@@ -6,6 +6,14 @@ use tokio::signal;
 use tracing::{error, info, warn};
 
 const USAGE_URL: &str = "https://api.anthropic.com/api/oauth/usage";
+
+fn capitalize(s: &str) -> String {
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().to_string() + c.as_str(),
+    }
+}
 const DEFAULT_POLL_INTERVAL_SECS: u64 = 900;
 
 enum FetchResult {
@@ -90,9 +98,17 @@ async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) -> bool {
     let seven_day_resets = usage.seven_day.as_ref().and_then(|b| b.resets_at);
 
     let creds = credentials::read_credentials().ok();
-    let sub_type = creds
-        .as_ref()
-        .and_then(|c| c.claude_ai_oauth.subscription_type.as_deref());
+    let sub_type = creds.as_ref().map(|c| {
+        let base = c.claude_ai_oauth.subscription_type.as_deref().unwrap_or("unknown");
+        let tier = c.claude_ai_oauth.rate_limit_tier.as_deref().unwrap_or("");
+        // Parse multiplier from tier like "default_claude_max_5x"
+        let multiplier = tier.rsplit('_').next().unwrap_or("");
+        if multiplier.ends_with('x') {
+            format!("{} {}", capitalize(base), multiplier)
+        } else {
+            capitalize(base)
+        }
+    });
 
     match shared::db::insert_usage_snapshot(
         pool,
@@ -101,7 +117,7 @@ async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) -> bool {
         seven_day_sonnet,
         five_hour_resets,
         seven_day_resets,
-        sub_type,
+        sub_type.as_deref(),
     )
     .await
     {
