@@ -8,22 +8,9 @@ import {
 import type { UsageSnapshot } from "./api";
 import { UsageGauge } from "./UsageGauge";
 import { UsageChart } from "./UsageChart";
+import { ClaudeSparkle } from "./ClaudeSparkle";
 import { LoginPage } from "./LoginPage";
 import "./App.css";
-
-const SPARKLE_CHARS = ["·", "✻", "✽", "✶", "✳", "✢"];
-
-function ClaudeSparkle() {
-  const [idx, setIdx] = useState(0);
-  const ref = useRef<ReturnType<typeof setInterval>>(undefined);
-  useEffect(() => {
-    ref.current = setInterval(() => {
-      setIdx((i) => (i + 1) % SPARKLE_CHARS.length);
-    }, 120);
-    return () => clearInterval(ref.current);
-  }, []);
-  return <span className="claude-sparkle">{SPARKLE_CHARS[idx]}</span>;
-}
 
 function useAnimatedFavicon() {
   useEffect(() => {
@@ -126,7 +113,10 @@ function App() {
             </svg>
           </a>
         </div>
-        <h1><ClaudeSparkle /> Claude Usage</h1>
+        <div className="header-center">
+          <h1>Claude Usage</h1>
+          <ClaudeSparkle />
+        </div>
         <div className="header-right">
           {localStorage.getItem("username") && (
             <span className="username">{localStorage.getItem("username")}</span>

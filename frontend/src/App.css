@@ -18,20 +18,48 @@
   margin-bottom: 2rem;
 }
 
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+}
+
+.claude-spinner {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 400;
+  font-size: 1.1rem;
+  background: linear-gradient(
+    90deg,
+    #d97757 0%,
+    #d97757 40%,
+    #f5c5a3 50%,
+    #d97757 60%,
+    #d97757 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .claude-sparkle {
   display: inline-block;
-  width: 1.2em;
+  width: 1em;
   text-align: center;
-  color: #d97757;
-  font-size: 1.2em;
 }
 
 .header-left {
