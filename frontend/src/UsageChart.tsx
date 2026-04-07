@@ -111,7 +111,7 @@ export function UsageChart({ data, range }: Props) {
             fontSize={12}
           />
           <Tooltip
-            labelFormatter={(idx: number) => chartData[idx]?.tooltipLabel ?? ""}
+            labelFormatter={(idx) => chartData[Number(idx)]?.tooltipLabel ?? ""}
             contentStyle={{
               background: "var(--card-bg)",
               border: "1px solid var(--border)",
