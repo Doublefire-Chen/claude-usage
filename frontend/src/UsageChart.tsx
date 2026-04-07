@@ -31,13 +31,21 @@ export function UsageChart({ data, range }: Props) {
     return <p className="no-data">No usage data yet.</p>;
   }
 
-  const chartData = data.map((d, i) => ({
-    idx: i,
-    label: formatLabel(d.timestamp, range),
-    "5h": d.five_hour_usage,
-    "7d": d.seven_day_usage,
-    "7d Sonnet": d.seven_day_sonnet_usage,
-  }));
+  const chartData = data.map((d, i) => {
+    const date = new Date(d.timestamp);
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mi = String(date.getMinutes()).padStart(2, "0");
+    return {
+      idx: i,
+      label: formatLabel(d.timestamp, range),
+      tooltipLabel: `${mm}-${dd} ${hh}:${mi}`,
+      "5h": d.five_hour_usage,
+      "7d": d.seven_day_usage,
+      "7d Sonnet": d.seven_day_sonnet_usage,
+    };
+  });
 
   // Pick ticks at round time boundaries
   const ticks: number[] = [];
@@ -86,7 +94,7 @@ export function UsageChart({ data, range }: Props) {
             fontSize={12}
           />
           <Tooltip
-            labelFormatter={(idx: number) => chartData[idx]?.label ?? ""}
+            labelFormatter={(idx: number) => chartData[idx]?.tooltipLabel ?? ""}
             contentStyle={{
               background: "var(--card-bg)",
               border: "1px solid var(--border)",
