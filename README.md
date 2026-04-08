@@ -6,7 +6,7 @@ Monitor your Claude usage over time. A local agent periodically collects usage d
 
 - **Usage gauges** - 5-hour, 7-day (all models), and 7-day (Sonnet only) utilization
 - **Historical charts** - View usage trends over 24h, 7d, or 30d
-- **Auto-refresh** - Dashboard updates every 10 minutes
+- **Auto-refresh** - Dashboard updates every 15 minutes
 - **Dark mode** - Follows system preference
 - **Reset timers** - Shows when each usage bucket resets
 

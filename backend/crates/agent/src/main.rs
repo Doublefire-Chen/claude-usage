@@ -14,7 +14,7 @@ fn capitalize(s: &str) -> String {
         Some(f) => f.to_uppercase().to_string() + c.as_str(),
     }
 }
-const DEFAULT_POLL_INTERVAL_SECS: u64 = 600;
+const DEFAULT_POLL_INTERVAL_SECS: u64 = 900;
 
 enum FetchResult {
     Ok(UsageResponse),
