@@ -78,13 +78,13 @@ function App() {
     fetchHistory(from).then(setHistory).catch((e) => setError(e.message));
   }, [range, authed]);
 
-  // Auto-refresh every 5 minutes
+  // Auto-refresh every 10 minutes
   useEffect(() => {
     if (!authed) return;
     const id = setInterval(() => {
       fetchCurrent().then(setCurrent).catch(() => {});
       fetchHistory(rangeToFrom(range)).then(setHistory).catch(() => {});
-    }, 300_000);
+    }, 600_000);
     return () => clearInterval(id);
   }, [range, authed]);
 
