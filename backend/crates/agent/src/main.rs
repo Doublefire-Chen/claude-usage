@@ -19,6 +19,7 @@ const DEFAULT_POLL_INTERVAL_SECS: u64 = 900;
 enum FetchResult {
     Ok(UsageResponse),
     RateLimited,
+    Unauthorized,
     Error(String),
 }
 
@@ -36,7 +37,7 @@ async fn fetch_usage(client: &reqwest::Client, token: &str) -> FetchResult {
 
     let status = resp.status();
     if status == reqwest::StatusCode::UNAUTHORIZED {
-        return FetchResult::Error("unauthorized (401) — token may be expired".into());
+        return FetchResult::Unauthorized;
     }
     if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
         return FetchResult::RateLimited;
@@ -63,8 +64,11 @@ async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) -> bool {
 
     let usage = match fetch_usage(client, &token).await {
         FetchResult::Ok(u) => u,
-        FetchResult::RateLimited => {
-            warn!("rate limited (429) — refreshing token");
+        first @ (FetchResult::RateLimited | FetchResult::Unauthorized) => {
+            match first {
+                FetchResult::RateLimited => warn!("rate limited (429) — refreshing token"),
+                _ => warn!("unauthorized (401) — refreshing token"),
+            }
             let new_token = match credentials::refresh_access_token(client).await {
                 Ok(t) => t,
                 Err(e) => {
@@ -77,6 +81,10 @@ async fn poll_once(client: &reqwest::Client, pool: &sqlx::PgPool) -> bool {
                 FetchResult::Ok(u) => u,
                 FetchResult::RateLimited => {
                     warn!("still rate limited after refresh — skipping");
+                    return false;
+                }
+                FetchResult::Unauthorized => {
+                    warn!("still unauthorized after refresh — skipping");
                     return false;
                 }
                 FetchResult::Error(e) => {

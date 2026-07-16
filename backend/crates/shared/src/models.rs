@@ -2,10 +2,15 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 /// Raw credentials JSON stored by Claude Code.
+/// The `extra` maps carry any fields Claude Code stores that we don't model
+/// (e.g. refreshTokenExpiresAt, scopes), so writing credentials back to the
+/// Keychain round-trips losslessly.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CredentialsFile {
     #[serde(rename = "claudeAiOauth")]
     pub claude_ai_oauth: OAuthCredentials,
+    #[serde(flatten)]
+    pub extra: serde_json::Map<String, serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,8 +19,12 @@ pub struct OAuthCredentials {
     pub access_token: String,
     pub refresh_token: String,
     pub expires_at: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub subscription_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub rate_limit_tier: Option<String>,
+    #[serde(flatten)]
+    pub extra: serde_json::Map<String, serde_json::Value>,
 }
 
 /// Response from GET https://api.anthropic.com/api/oauth/usage
